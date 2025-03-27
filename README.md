@@ -1,81 +1,60 @@
-# Bollywood Music Jamming App
+# Bollywood Jamming Session 🎶
 
-A **Generative AI-powered** music jamming application that arranges Bollywood songs dynamically based on mood, theme, and user preferences. This app separates music and lyrics, displaying **bold lyrics** while playing **instrumental tracks** for an immersive karaoke-like jamming experience.
+## Overview
+This Streamlit app generates a Bollywood song mashup for a jamming session. Users can input a **Genre (required)** and an **Artist (optional)**, along with the number of songs they want. The app fetches lyrics from LyricsOVH, arranges them creatively using LLM and RAG techniques, and outputs a jam-ready lyrical arrangement.
 
 ## Features
-- **Dynamic Song Arrangement**: AI arranges songs to create a seamless jamming experience.
-- **Lyric-based Song Transitions**: Songs switch when similar words appear in two tracks.
-- **Background Transitions**: UI dynamically changes as songs switch.
-- **Auto Mode**: AI automatically selects and arranges songs.
-- **Save & Replay**: Save jam sessions and replay them later.
-- **Manual Transitions**: Users can adjust song transitions.
-- **Collaborative Mode**: Share and jam with friends.
-- **Favorites**: Mark songs for jamming.
-- **User Profiles**: Save history, preferences, and jam sessions.
-- **Upload Custom Songs**: Integrate personal songs into jam sessions.
-
-## Tech Stack
-- **Frontend**: React.js
-- **Backend**: Flask (Python)
-- **AI Module**: NLP, Vectorization, LangChain
-- **APIs**:
-  - **Spotify API** (Song metadata & streaming)
-  - **Last.fm API** (Moods, themes, and metadata)
-  - **JioSaavn Web Scraping** (Song search & details)
+- **User Inputs:** Genre (required), Artist (optional), Number of Songs (slider)
+- **Song Selection:** Matches songs from `ex.csv` based on user inputs
+- **Lyrics Fetching:** Scrapes lyrics from LyricsOVH API and stores them in a SQLite database
+- **Jamming Arrangement:**
+  - Uses intros, interludes, and outros from different songs
+  - Reuses song parts to enhance the flow
+  - Switches between songs if a common word appears
+- **Interactive UI:** Built with Streamlit for seamless user experience
 
 ## Installation
-### 1. Clone the Repository
-```bash
-git clone https://github.com/your-repo/bollywood-music-jamming.git
-cd bollywood-music-jamming
-```
+### Prerequisites
+- Python 3.x
+- Pip
+- Streamlit
+- OpenAI API key (for LLM integration)
 
-### 2. Install Dependencies
-```bash
-pip install -r requirements.txt
-```
+### Setup
+1. Clone the repository:
+   ```sh
+   git clone <repository-url>
+   cd bollywood-jamming
+   ```
+2. Install dependencies:
+   ```sh
+   pip install -r requirements.txt
+   ```
+3. Run the Streamlit app:
+   ```sh
+   streamlit run app.py
+   ```
 
-### 3. Run the Backend
-```bash
-python backend.py
-```
+## Configuration
+- **API Keys:** Update OpenAI API key in the script.
+- **Dataset:** Ensure `ex.csv` contains Bollywood song data with columns:
+  - Song-Name
+  - Singer/Artists
+  - Genre
+  - Album/Movie
+  - User-Rating
 
-### 4. Run the Frontend
-```bash
-cd frontend
-npm install
-npm start
-```
-
-## API Usage
-### **1. Get Songs**
-Endpoint: `/get_songs` (POST)
-```json
-{
-  "mood": "happy",
-  "theme": "love",
-  "release_year_range": [2000, 2023],
-  "artists": ["Arijit Singh", "Shreya Ghoshal"]
-}
-```
-Response:
-```json
-[
-  {"title": "Tum Hi Ho", "artist": "Arijit Singh"},
-  {"title": "Channa Mereya", "artist": "Arijit Singh"}
-]
-```
+## Usage
+1. **Select Genre**: Mandatory input
+2. **Enter Artist** (Optional)
+3. **Adjust Number of Songs**: Using the slider
+4. **Click 'Create Jamming'**
+5. **Enjoy the lyrical arrangement!** 🎤
 
 ## Future Enhancements
-- **Real-time Beat Detection**: Improved transitions based on beat matching.
-- **Live Jamming Mode**: Synchronize multiple users in real-time.
-- **AI Voice Separation**: More accurate instrumental extraction.
-
-## Contributing
-1. Fork the repository.
-2. Create a new branch (`feature-branch-name`).
-3. Commit your changes.
-4. Open a Pull Request.
+- Improve NLP for better song transitions
+- Integrate with YouTube for audio snippets
+- Allow users to save and share jamming sessions
 
 ## License
 MIT License
