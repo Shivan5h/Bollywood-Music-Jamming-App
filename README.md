@@ -1,61 +1,148 @@
-# Bollywood Jamming Session 🎶
 
-## Overview
-This Streamlit app generates a Bollywood song mashup for a jamming session. Users can input a **Genre (required)** and an **Artist (optional)**, along with the number of songs they want. The app fetches lyrics from LyricsOVH, arranges them creatively using LLM and RAG techniques, and outputs a jam-ready lyrical arrangement.
+# 🎶 Bollywood Music Jamming App
 
-## Features
-- **User Inputs:** Genre (required), Artist (optional), Number of Songs (slider)
-- **Song Selection:** Matches songs from `ex.csv` based on user inputs
-- **Lyrics Fetching:** Scrapes lyrics from LyricsOVH API and stores them in a SQLite database
-- **Jamming Arrangement:**
-  - Uses intros, interludes, and outros from different songs
-  - Reuses song parts to enhance the flow
-  - Switches between songs if a common word appears
-- **Interactive UI:** Built with Streamlit for seamless user experience
+An AI-powered jamming platform that curates and blends Bollywood songs into a seamless musical session based on user inputs like mood, theme, year, and favorite artists. Lyrics are separated from the music, and instrumental parts are played while bold lyrics appear dynamically with a visually adaptive UI.
 
-## Installation
-### Prerequisites
-- Python 3.x
-- Pip
-- Streamlit
-- OpenAI API key (for LLM integration)
+---
 
-### Setup
-1. Clone the repository:
-   ```sh
-   git clone <repository-url>
-   cd bollywood-jamming
-   ```
-2. Install dependencies:
-   ```sh
-   pip install -r requirements.txt
-   ```
-3. Run the Streamlit app:
-   ```sh
-   streamlit run app.py
-   ```
+## 🚀 Features
 
-## Configuration
-- **API Keys:** Update OpenAI API key in the script.
-- **Dataset:** Ensure `ex.csv` contains Bollywood song data with columns:
-  - Song-Name
-  - Singer/Artists
-  - Genre
-  - Album/Movie
-  - User-Rating
+- 🎧 **Jamming Flow Generator**: Intro → Interludes → Chorus → Outro.
+- 🧠 **GenAI + NLP**: Understands mood/theme and arranges songs accordingly.
+- 🎵 **Lyrics & Instrument Separation**: Shows bold lyrics while playing only instrumental versions.
+- 🎨 **Dynamic UI**: Backgrounds adapt to song transitions.
+- 🤖 **Auto Mode**: Let AI auto-select and arrange songs.
+- ✨ **Manual Mode**: Manually control transitions and parts.
+- 🎶 **Multi-API Support**: Spotify, Saavn, Last.fm, Musixmatch, (optionally Qroq).
+- ❤️ **Favorite Songs**: Mark and save preferred tracks.
+- 🔗 **Collab + Share**: Share jam sessions with friends.
 
-## Usage
-1. **Select Genre**: Mandatory input
-2. **Enter Artist** (Optional)
-3. **Adjust Number of Songs**: Using the slider
-4. **Click 'Create Jamming'**
-5. **Enjoy the lyrical arrangement!** 🎤
+---
 
-## Future Enhancements
-- Improve NLP for better song transitions
-- Integrate with YouTube for audio snippets
-- Allow users to save and share jamming sessions
+## 🧠 Tech Stack
 
-## License
-MIT License
+| Layer         | Tools/Frameworks |
+|---------------|------------------|
+| 🧠 AI Layer    | GenAI, NLP, LangChain |
+| 🎼 Music APIs  | Spotify API, Saavn API (saavn.dev), Last.fm, Musixmatch |
+| 🎛️ Audio Ops  | Librosa, Pydub, Transformers (for BERT) |
+| 💻 Backend     | FastAPI / Flask (optional), Python |
+| 🌐 Frontend    | Streamlit / React |
+| 📦 Deployment  | Vercel / Streamlit Cloud / Localhost |
+| 🔑 API Key Used | Qroq (optional, replace with working endpoints) |
 
+---
+
+## 📥 Setup Instructions
+
+### 1. Clone the Repo
+
+```bash
+git clone https://github.com/yourusername/Bollywood-Music-Jamming-App.git
+cd Bollywood-Music-Jamming-App
+```
+
+### 2. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Add Your API Keys
+
+Create a `.env` file:
+
+```
+SPOTIFY_CLIENT_ID=your_id
+SPOTIFY_CLIENT_SECRET=your_secret
+LASTFM_API_KEY=your_key
+SAAVN_API_KEY=your_key
+MUSIXMATCH_API_KEY=your_key
+QROQ_API_KEY=your_key   # Optional
+```
+
+Or directly assign them in the script if testing locally.
+
+---
+
+## ▶️ Run the App
+
+```bash
+streamlit run app.py
+```
+
+Or if you're using `app2.py` (LangGraph):
+
+```bash
+python app2.py
+```
+
+---
+
+## 🧪 Sample Input
+
+- 🎵 Number of Songs: 5  
+- 🎭 Mood: Chill  
+- 🎨 Theme: Friendship  
+- 📅 Year Range: 2010–2020  
+- 🧑‍🎤 Artists: Arijit Singh, Pritam, Amit Trivedi
+
+---
+
+## 📦 Folder Structure
+
+```
+Bollywood-Music-Jamming-App/
+│
+├── app.py              # Main Streamlit app
+├── app2.py             # LangGraph AI pipeline
+├── utils/
+│   ├── api_wrappers.py
+│   └── audio_utils.py
+├── assets/
+│   └── visuals/        # Dynamic UI backgrounds
+├── README.md
+└── requirements.txt
+```
+
+---
+
+## 🛠️ Troubleshooting
+
+- ❌ **Qroq URL Not Working**:
+  - Replace with OpenAI/HuggingFace LLM alternatives.
+  - Or contact Qroq support for updated endpoints.
+
+- 🎧 **Audio Not Playing?**
+  - Ensure `ffmpeg` is installed for Pydub:
+    ```bash
+    brew install ffmpeg  # macOS
+    sudo apt install ffmpeg  # Ubuntu
+    ```
+
+---
+
+## 💡 Future Enhancements
+
+- 🎛️ Drag-and-drop song parts to rearrange manually.
+- 🗣️ Voice input for mood/theme detection.
+- 📱 Mobile-friendly UI.
+- 🧩 Plugin mode for DJ apps.
+
+---
+
+## 🤝 Contributing
+
+Feel free to open issues or PRs for new features or bug fixes. All contributions are welcome.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+## 👨‍💻 Author
+
+Built with ❤️ by [Your Name].

@@ -1,69 +1,117 @@
 import streamlit as st
-import pandas as pd
-import random
+from langgraph.graph import StateGraph
+from typing import List, Dict, Any, TypedDict
 import requests
-from transformers import pipeline
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.vectorstores import Chroma
-from langchain_community.vectorstores import Chroma
-from langchain.document_loaders import DataFrameLoader
-from langchain.llms import OpenAI
-import os
+import json
 
-os.environ["OPENAI_API_KEY"] = "openaiapikey"
-# Load the dataset
-df = pd.read_csv("ex.csv")
+# Your Qroq API Key
+API_KEY = "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"
 
-def fetch_lyrics(artist, song):
-    url = f"https://api.lyrics.ovh/v1/{artist}/{song}"
-    response = requests.get(url)
-    if response.status_code == 200:
-        return response.json().get("lyrics", "Lyrics not found")
-    return "Lyrics not found"
+# Headers with the API key
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+# === Define state schema ===
+class JamState(TypedDict):
+    mood: str
+    theme: str
+    song_range: tuple
+    release_years: tuple
+    stars: List[str]
+    songs: List[Dict[str, Any]]
+    jam_session: List[Dict[str, Any]]
 
-# Streamlit UI
-st.title("Bollywood Jamming Session AI")
+# === LangGraph Setup ===
+graph = StateGraph(state_schema=JamState)
 
-embedding_function = OpenAIEmbeddings()
+# === LangGraph Nodes ===
+# Define functions
+def fetch_songs_and_lyrics(inputs: Dict[str, Any]) -> Dict[str, Any]:
+    mood = inputs["mood"]
+    theme = inputs["theme"]
+    song_range = inputs["song_range"]
+    release_years = inputs["release_years"]
+    stars = inputs["stars"]
 
-artist_input = st.text_input("Enter Artist (Optional)")
-genre_input = st.text_input("Enter Genre (Required)")
-song_count = st.slider("Number of Songs", min_value=1, max_value=10, value=5)
+    payload = {
+        "mood": mood,
+        "theme": theme,
+        "song_range": song_range,
+        "release_years": release_years,
+        "stars": stars
+    }
 
-if st.button("Create Jamming"):
-    # Filter dataset
-    filtered_songs = df[df["Genre"].str.contains(genre_input, case=False, na=False)]
-    if artist_input:
-        filtered_songs = filtered_songs[filtered_songs["Singer/Artists"].str.contains(artist_input, case=False, na=False)]
-    
-    if filtered_songs.empty:
-        st.warning("No songs found for the given criteria.")
+    response = requests.post("http://localhost:11434/api/generate", json={
+        "model": "ollama_model_name",
+        "prompt": json.dumps(payload)
+    })
+    songs = response.json().get("songs", [])
+    return {"songs": songs}
+
+
+def generate_jam_session(inputs: Dict[str, Any]) -> Dict[str, Any]:
+    songs = inputs["songs"]
+    response = requests.post(
+        "https://api.qroq.io/jamgen", 
+        json={"songs": songs},
+        headers=headers 
+    )
+    session = response.json().get("session", [])
+    return {"jam_session": session}
+
+
+# Add them to graph
+graph.add_node("fetch_songs_and_lyrics", fetch_songs_and_lyrics)
+graph.add_node("generate_jam_session", generate_jam_session)
+
+# Set up the graph flow
+# === LangGraph Assembly ===
+graph.set_entry_point("fetch_songs_and_lyrics")
+graph.add_edge("fetch_songs_and_lyrics", "generate_jam_session")
+graph.set_finish_point("generate_jam_session")
+
+
+app = graph.compile()
+
+# === Streamlit UI ===
+st.title("🎶 Bollywood Music Jamming App")
+st.markdown("Create a custom jamming session based on your mood and theme.")
+
+# Required inputs
+mood = st.text_input("Mood (Required)", placeholder="e.g., romantic, energetic")
+theme = st.text_input("Theme (Required)", placeholder="e.g., rain, heartbreak")
+
+# Sliders
+use_time = st.checkbox("Use time limit instead of number of songs")
+if use_time:
+    time_limit = st.slider("Time Limit (in minutes)", 5, 60, 15)
+    song_range = (1, time_limit // 3)
+else:
+    song_range = st.slider("Number of Songs (Range)", 1, 10, (3, 5))
+
+# Optional inputs
+release_years = st.slider("Release Year Range (Optional)", 1980, 2025, (2000, 2020))
+star1 = st.text_input("Favorite Star 1 (Optional)")
+star2 = st.text_input("Favorite Star 2 (Optional)")
+star3 = st.text_input("Favorite Star 3 (Optional)")
+stars = [s for s in [star1, star2, star3] if s.strip()]
+
+if st.button("Generate Jam Session"):
+    if not mood or not theme:
+        st.error("Mood and Theme are required inputs.")
     else:
-        selected_songs = filtered_songs.sample(min(song_count, len(filtered_songs)))
-        song_lyrics = {}
-        
-        for _, row in selected_songs.iterrows():
-            lyrics = fetch_lyrics(str(row["Singer/Artists"]).split(",")[0], row["Song-Name"])
-            song_lyrics[row["Song-Name"]] = lyrics
-        
-        # NLP-based arrangement
-        llm = OpenAI()
-        selected_songs["Lyrics"] = selected_songs["Song-Name"].apply(lambda song: song_lyrics.get(song, ""))
-        loader = DataFrameLoader(selected_songs, page_content_column="Lyrics")
-        documents = loader.load()
-        vectorstore = Chroma.from_documents(
-            documents,
-            embedding=embedding_function,
-            persist_directory="./chroma_db"
-        )
+        with st.spinner("Generating session..."):
+            result = app.invoke({
+                "mood": mood,
+                "theme": theme,
+                "song_range": song_range,
+                "release_years": release_years,
+                "stars": stars
+            })
+            jam_session = result["jam_session"]
 
-
-        jam_arrangement = ""
-        
-        for song, lyrics in song_lyrics.items():
-            jam_arrangement += f"{song}: {lyrics[:300]}...\n\n"  # Truncated for jamming flow
-        
-        # Display final jamming session
-        st.subheader("Your Jamming Session:")
-        st.text(jam_arrangement)
+        st.success("Here's your jamming session!")
+        for part in jam_session:
+            st.subheader(f"{part['part'].capitalize()} - {part['song']}")
+            st.write(part['lyrics'])
